@@ -1,0 +1,112 @@
+[
+  {
+    "id": 1,
+    "pergunta": "Qual é a capital do Brasil?",
+    "opcoes": [
+      "São Paulo",
+      "Rio de Janeiro", 
+      "Brasília",
+      "Salvador"
+    ],
+    "respostaCorreta": 2
+  },
+  {
+    "id": 2,
+    "pergunta": "Qual é o maior planeta do sistema solar?",
+    "opcoes": [
+      "Terra",
+      "Marte",
+      "Júpiter",
+      "Saturno"
+    ],
+    "respostaCorreta": 2
+  },
+  {
+    "id": 3,
+    "pergunta": "Em que ano o Brasil foi descoberto?",
+    "opcoes": [
+      "1498",
+      "1500",
+      "1502",
+      "1505"
+    ],
+    "respostaCorreta": 1
+  },
+  {
+    "id": 4,
+    "pergunta": "Qual é o resultado de 15 + 25?",
+    "opcoes": [
+      "35",
+      "40",
+      "45",
+      "50"
+    ],
+    "respostaCorreta": 1
+  },
+  {
+    "id": 5,
+    "pergunta": "Quem pintou a Mona Lisa?",
+    "opcoes": [
+      "Van Gogh",
+      "Picasso",
+      "Leonardo da Vinci",
+      "Michelangelo"
+    ],
+    "respostaCorreta": 2
+  },
+  {
+    "id": 6,
+    "pergunta": "Qual é o oceano que banha a costa leste do Brasil?",
+    "opcoes": [
+      "Pacífico",
+      "Atlântico",
+      "Índico",
+      "Ártico"
+    ],
+    "respostaCorreta": 1
+  },
+  {
+    "id": 7,
+    "pergunta": "Quantos continentes existem no mundo?",
+    "opcoes": [
+      "5",
+      "6", 
+      "7",
+      "8"
+    ],
+    "respostaCorreta": 2
+  },
+  {
+    "id": 8,
+    "pergunta": "Qual é a fórmula química da água?",
+    "opcoes": [
+      "H2O",
+      "CO2",
+      "NaCl",
+      "O2"
+    ],
+    "respostaCorreta": 0
+  },
+  {
+    "id": 9,
+    "pergunta": "Em que país fica Machu Picchu?",
+    "opcoes": [
+      "Brasil",
+      "Argentina",
+      "Peru",
+      "Chile"
+    ],
+    "respostaCorreta": 2
+  },
+  {
+    "id": 10,
+    "pergunta": "Qual é o menor país do mundo?",
+    "opcoes": [
+      "Monaco",
+      "Vaticano",
+      "San Marino",
+      "Nauru"
+    ],
+    "respostaCorreta": 1
+  }
+]
