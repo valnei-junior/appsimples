@@ -19,7 +19,7 @@ export default function Resultado() {
   const params = useLocalSearchParams();
   
   const pontuacao = parseInt(params.pontuacao) || 0;
-  const totalPerguntas = parseInt(params.totalPerguntas) || 10;
+  const totalPerguntas = parseInt(params.totalPerguntas) || 15;
   const respostasUsuario = params.respostasString 
     ? JSON.parse(params.respostasString) 
     : [];
@@ -115,12 +115,12 @@ export default function Resultado() {
             },
           ]}
         >
-          <Text style={styles.detalhesTitle}>Resumo das Respostas</Text>
-          
+          <Text style={styles.detalhesTitle}>Resumo das Respostas</Text> 
           {respostasUsuario.map((resposta, index) => (
+            //
             <View key={index} style={styles.respostaItem}>
               <View style={styles.respostaHeader}>
-                <Text style={styles.respostaNumer}>#{index + 1}</Text>
+                <Text style={styles.respostaNumero}>#{index + 1}</Text>
                 <View style={[
                   styles.respostaStatus,
                   { backgroundColor: resposta.acertou ? '#e8f5e8' : '#ffebee' }
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  respostaNumer: {
+  respostaNumero: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#666',
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   estatisticaNumero: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#3498db',
+    color: 'brown',
     marginBottom: 5,
   },
   estatisticaTexto: {
@@ -322,10 +322,10 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   botaoRefazer: {
-    backgroundColor: '#3498db',
+    backgroundColor: 'brown',
     paddingVertical: 16,
     borderRadius: 25,
-    shadowColor: '#3498db',
+    shadowColor: 'brown',
     shadowOffset: {
       width: 0,
       height: 4,
@@ -361,4 +361,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+
 });

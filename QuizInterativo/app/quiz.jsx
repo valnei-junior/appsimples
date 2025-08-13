@@ -12,6 +12,11 @@ import {
 import { useRouter } from 'expo-router';
 import perguntasData from '../data/perguntas.json';
 import soundService from '../services/SimpleSoundService';
+ const router = useRouter();
+
+ const voltarHome = () => {
+  router.push('/');
+ };
 
 const { width } = Dimensions.get('window');
 
@@ -19,6 +24,7 @@ const { width } = Dimensions.get('window');
 const Pergunta = ({ pergunta, numeroPergunta, totalPerguntas }) => {
   return (
     <View style={perguntaStyles.container}>
+      
       <View style={perguntaStyles.header}>
         <Text style={perguntaStyles.contador}>
           Pergunta {numeroPergunta} de {totalPerguntas}
@@ -66,7 +72,10 @@ const Opcoes = ({ opcoes, onSelect, opcaoSelecionada, respostaCorreta, mostrarRe
     return opcoesStyles.textoDesabilitado;
   };
 
+
+
   return (
+    <>
     <View style={opcoesStyles.container}>
       {opcoes.map((opcao, index) => (
         <TouchableOpacity
@@ -86,7 +95,13 @@ const Opcoes = ({ opcoes, onSelect, opcaoSelecionada, respostaCorreta, mostrarRe
           </View>
         </TouchableOpacity>
       ))}
+      
+      <TouchableOpacity style={styles.botaoHome} onPress={voltarHome}>
+        <Text style={styles.textoBotaoHome}>🏠 Voltar ao Início</Text>
+      </TouchableOpacity>
     </View>
+    
+    </>
   );
 };
 
@@ -157,16 +172,16 @@ export default function Quiz() {
       
       setRespostasUsuario([...respostasUsuario, novaResposta]);
       
-      // Auto-avança após 2 segundos se não for a última pergunta
+      // Auto-avança após 0,2 segundos se não for a última pergunta
       if (perguntaAtual < perguntasData.length - 1) {
         setTimeout(() => {
           proximaPergunta();
-        }, 2000);
+        }, 20);
       } else {
-        // Se for a última pergunta, vai para resultado após 2 segundos
+        // Se for a última pergunta, vai para resultado após 0,2 segundos
         setTimeout(() => {
           irParaResultado();
-        }, 2000);
+        }, 20);
       }
     }, 300);
   };
@@ -215,21 +230,35 @@ export default function Quiz() {
   };
 
   const irParaResultado = () => {
-    const resultadoFinal = {
-      pontuacao: pontuacao + (opcaoSelecionada === perguntasData[perguntaAtual]?.respostaCorreta ? 1 : 0),
-      totalPerguntas: perguntasData.length,
-      respostasUsuario: respostasUsuario,
-    };
-    
-    router.push({
-      pathname: '/resultado',
-      params: { 
-        pontuacao: resultadoFinal.pontuacao,
-        totalPerguntas: resultadoFinal.totalPerguntas,
-        respostasString: JSON.stringify(resultadoFinal.respostasUsuario)
-      }
-    });
+  const perguntaFinal = perguntasData[perguntaAtual];
+  const acertou = opcaoSelecionada === perguntaFinal?.respostaCorreta;
+
+  const ultimaResposta = {
+    pergunta: perguntaFinal.pergunta,
+    opcaoSelecionada: opcaoSelecionada,
+    respostaCorreta: perguntaFinal.respostaCorreta,
+    acertou: acertou,
   };
+
+  const respostasCompletas = [...respostasUsuario, ultimaResposta];
+
+  const resultadoFinal = {
+    pontuacao: pontuacao + (acertou ? 1 : 0),
+    totalPerguntas: perguntasData.length,
+    respostasUsuario: respostasCompletas,
+  };
+
+  router.push({
+    pathname: '/resultado',
+    params: {
+      pontuacao: resultadoFinal.pontuacao,
+      totalPerguntas: resultadoFinal.totalPerguntas,
+      respostasString: JSON.stringify(resultadoFinal.respostasUsuario)
+    }
+  });
+};
+
+
 
   // Efeito para animação inicial
   useEffect(() => {
@@ -330,6 +359,7 @@ export default function Quiz() {
 const perguntaStyles = StyleSheet.create({
   container: {
     marginBottom: 30,
+    marginTop: 20,
   },
   header: {
     alignItems: 'center',
@@ -483,7 +513,8 @@ const styles = StyleSheet.create({
   },
   progressContainer: {
     marginHorizontal: 20,
-    marginBottom: 30,
+    marginBottom: 5,
+    marginTop: 40,
   },
   progressBar: {
     height: 6,
@@ -493,7 +524,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#3498db',
+    backgroundColor: 'green',
     borderRadius: 3,
   },
   feedback: {
@@ -539,5 +570,26 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  textoBotaoHome: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  botaoHome: {
+    backgroundColor: 'brown',
+    paddingVertical: 18,
+    paddingHorizontal: 50,
+    borderRadius: 30,
+    shadowColor: 'brown',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+    marginTop: 30,
   },
 });

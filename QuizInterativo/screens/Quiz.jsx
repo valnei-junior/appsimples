@@ -6,6 +6,7 @@ import {
   Alert,
   Animated,
   PanResponder,
+  Text,
   Dimensions,
 } from 'react-native';
 import Pergunta from '../components/Pergunta';

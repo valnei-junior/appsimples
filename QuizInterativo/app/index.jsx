@@ -30,15 +30,15 @@ export default function Home() {
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.titulo}>🧠</Text>
-          <Text style={styles.subtitulo}>Quiz Interativo</Text>
+          <Text style={styles.subtitulo}>Potiquiz</Text>
           <Text style={styles.descricao}>
-            Teste seus conhecimentos com perguntas desafiadoras!
+            Teste seus conhecimentos com perguntas desafiadoras sobre nossa história!
           </Text>
         </View>
 
         <View style={styles.infoContainer}>
           <View style={styles.infoItem}>
-            <Text style={styles.infoNumero}>10</Text>
+            <Text style={styles.infoNumero}>15</Text>
             <Text style={styles.infoTexto}>Perguntas</Text>
           </View>
           <View style={styles.divisor} />
@@ -93,8 +93,8 @@ const styles = StyleSheet.create({
   subtitulo: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 15,
+    color: 'brown',
+    marginBottom: 10,
     textAlign: 'center',
   },
   descricao: {
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   infoNumero: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#3498db',
+    color: 'brown',
     marginBottom: 5,
   },
   infoTexto: {
@@ -140,11 +140,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   botaoIniciar: {
-    backgroundColor: '#3498db',
+    backgroundColor: 'brown',
     paddingVertical: 18,
     paddingHorizontal: 50,
     borderRadius: 30,
-    shadowColor: '#3498db',
+    shadowColor: 'brown',
     shadowOffset: {
       width: 0,
       height: 4,

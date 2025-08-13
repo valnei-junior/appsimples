@@ -1,112 +1,167 @@
 [
   {
     "id": 1,
-    "pergunta": "Qual é a capital do Brasil?",
+    "pergunta": "Quem foi Nísia Floresta?",
     "opcoes": [
-      "São Paulo",
-      "Rio de Janeiro", 
-      "Brasília",
-      "Salvador"
+      "Uma artista plástica modernista de Natal",
+      "A primeira mulher eleita prefeita no RN",
+      "Uma educadora e pioneira do feminismo no Brasil",
+      "Uma revolucionária que lutou na Intentona Comunista"
     ],
     "respostaCorreta": 2
   },
   {
     "id": 2,
-    "pergunta": "Qual é o maior planeta do sistema solar?",
+    "pergunta": "Câmara Cascudo é conhecido por:",
     "opcoes": [
-      "Terra",
-      "Marte",
-      "Júpiter",
-      "Saturno"
+      "Criar o hino do RN",
+      "Escrever sobre o folclore e a cultura popular brasileira",
+      "Ter sido governador do estado",
+      "Fundar a primeira rádio do RN"
     ],
-    "respostaCorreta": 2
+    "respostaCorreta": 1
   },
   {
     "id": 3,
-    "pergunta": "Em que ano o Brasil foi descoberto?",
+    "pergunta": "Qual foi a primeira mulher a votar no Brasil, natural do Rio Grande do Norte?",
     "opcoes": [
-      "1498",
-      "1500",
-      "1502",
-      "1505"
-    ],
-    "respostaCorreta": 1
-  },
-  {
-    "id": 4,
-    "pergunta": "Qual é o resultado de 15 + 25?",
-    "opcoes": [
-      "35",
-      "40",
-      "45",
-      "50"
-    ],
-    "respostaCorreta": 1
-  },
-  {
-    "id": 5,
-    "pergunta": "Quem pintou a Mona Lisa?",
-    "opcoes": [
-      "Van Gogh",
-      "Picasso",
-      "Leonardo da Vinci",
-      "Michelangelo"
-    ],
-    "respostaCorreta": 2
-  },
-  {
-    "id": 6,
-    "pergunta": "Qual é o oceano que banha a costa leste do Brasil?",
-    "opcoes": [
-      "Pacífico",
-      "Atlântico",
-      "Índico",
-      "Ártico"
-    ],
-    "respostaCorreta": 1
-  },
-  {
-    "id": 7,
-    "pergunta": "Quantos continentes existem no mundo?",
-    "opcoes": [
-      "5",
-      "6", 
-      "7",
-      "8"
-    ],
-    "respostaCorreta": 2
-  },
-  {
-    "id": 8,
-    "pergunta": "Qual é a fórmula química da água?",
-    "opcoes": [
-      "H2O",
-      "CO2",
-      "NaCl",
-      "O2"
+      "Celina Guimarães",
+      "Nísia Floresta",
+      "Zila Mamede",
+      "Auta de Souza"
     ],
     "respostaCorreta": 0
   },
   {
-    "id": 9,
-    "pergunta": "Em que país fica Machu Picchu?",
+    "id": 4,
+    "pergunta": "Quem foi Alberto Maranhão?",
     "opcoes": [
-      "Brasil",
-      "Argentina",
-      "Peru",
-      "Chile"
+      "Um militar da Revolução de 1930",
+      "Um engenheiro que construiu a ponte Newton Navarro",
+      "Um político que governou o RN no início do século XX",
+      "Um poeta modernista"
     ],
     "respostaCorreta": 2
   },
   {
-    "id": 10,
-    "pergunta": "Qual é o menor país do mundo?",
+    "id": 5,
+    "pergunta": "Augusto Severo ficou conhecido por:",
     "opcoes": [
-      "Monaco",
-      "Vaticano",
-      "San Marino",
-      "Nauru"
+      "Ter sido o primeiro senador potiguar",
+      "Projetar e pilotar um dirigível",
+      "Escrever o primeiro romance potiguar",
+      "Ter sido padre e educador"
     ],
     "respostaCorreta": 1
+  },
+  {
+    "id": 6,
+    "pergunta": "Quem foi o Monsenhor Walfredo Gurgel?",
+    "opcoes": [
+      "Médico e político, conhecido por suas ações em saúde pública",
+      "Advogado e ex-governador que construiu a ponte de Igapó",
+      "Professor de Direito da UFRN",
+      "Líder estudantil na época da Ditadura Militar"
+    ],
+    "respostaCorreta": 0
+  },
+  {
+    "id": 7,
+    "pergunta": "O que foi a Insurreição de Beckman, relacionada ao Rio Grande do Norte?",
+    "opcoes": [
+      "Uma revolta popular contra a escravidão",
+      "Um conflito armado entre indígenas e colonizadores",
+      "Uma revolução republicana liderada por militares",
+      "Um movimento de resistência contra o domínio holandês"
+    ],
+    "respostaCorreta": 3
+  },
+  {
+    "id": 8,
+    "pergunta": "Café Filho teve destaque por:",
+    "opcoes": [
+      "Ser governador do RN durante a República Velha",
+      "Criar a Universidade Federal do RN",
+      "Fundar o jornal 'A República'",
+      "Ser o primeiro potiguar a assumir a Presidência da República"
+    ],
+    "respostaCorreta": 3
+  },
+  {
+    "id": 9,
+    "pergunta": "Quem foi João Câmara?",
+    "opcoes": [
+      "Um revolucionário que participou do movimento de 1817",
+      "Um artista plástico e escritor contemporâneo",
+      "Um ex-prefeito de Natal e fundador do bairro Tirol",
+      "Um poeta da geração de 45"
+    ],
+    "respostaCorreta": 1
+  },
+  {
+    "id": 10,
+    "pergunta": "Como morreu Zila Mamede?",
+    "opcoes": [
+      "Vítima de um acidente de carro na BR-101",
+      "Assassinada em sua residência em Natal",
+      "Em um incêndio na Biblioteca Central da UFRN",
+      "Afogada no mar de Natal, após sofrer um mal súbito"
+    ],
+    "respostaCorreta": 3
+  },
+  {
+    "id": 11,
+    "pergunta": "Quem foi Alexandrino de Alencar?",
+    "opcoes": [
+      "Militar potiguar que lutou contra os holandeses",
+      "Poeta simbolista do interior do RN",
+      "Empresário e político influente de Macaíba no século XIX",
+      "Fundador da Universidade Federal do RN"
+  ],
+  "respostaCorreta": 2
+  },
+  {
+    "id": 12,
+    "pergunta": "Quem foi Felipe Camarão?",
+    "opcoes": [
+      "Líder indígena que combateu os invasores holandeses no século XVII",
+      "Escravo alforriado que fundou o bairro das Rocas",
+      "Poeta romântico da região do Seridó",
+      "Capitão português que fundou o Forte dos Reis Magos"
+    ],
+    "respostaCorreta": 0
+  },
+  {
+    "id": 13,
+    "pergunta": "A poetisa Auta de Souza é lembrada por:",
+    "opcoes": [
+      "Fundar uma escola em Macaíba",
+      "Ser uma das primeiras romancistas potiguares",
+      "Suas poesias simbolistas e religiosas",
+      "Criar o jornal literário 'O Poti'"
+    ],
+    "respostaCorreta": 2
+  },
+  {
+    "id": 14,
+    "pergunta": "Quem foi Nevaldo Rocha?",
+    "opcoes": [
+      "Médico e ativista da saúde pública no Seridó",
+      "Empresário potiguar fundador do grupo Guararapes e das Lojas Riachuelo",
+      "Político responsável pela construção do Teatro Alberto Maranhão",
+      "Escritor regionalista e membro da Academia Norte-Riograndense de Letras"
+    ],
+    "respostaCorreta": 1
+  },
+  {
+    "id": 15,
+    "pergunta": "Por que Macaíba/RN se destacou historicamente no século XIX e início do XX?",
+    "opcoes": [
+      "Colônias agrícolas financiadas pela Coroa Portuguesa",
+    "Localização estratégica próxima ao rio Jundiaí",
+    "Presença de um forte militar",
+    "Exportação de açúcar por famílias estrangeiras"
+  ],
+  "respostaCorreta": 1
   }
 ]
