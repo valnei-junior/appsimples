@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { useRouter, useSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import perguntasData from '../data/perguntas.json';
 import soundService from '../services/SimpleSoundService';
 import { useConfig } from '../contexts/ConfigContext';
@@ -19,7 +19,6 @@ const { width } = Dimensions.get('window');
 
 export default function Quiz() {
   const router = useRouter();
-  const { nome } = useSearchParams();
   const { theme, somAtivado } = useConfig();
   const [perguntas, setPerguntas] = useState([]); // Estado local para perguntas embaralhadas
   const [perguntaAtual, setPerguntaAtual] = useState(0);
@@ -237,7 +236,6 @@ export default function Quiz() {
     const respostasCompletas = [...respostasUsuario, ultimaResposta];
 
     const resultadoFinal = {
-      nome: nome || 'Usuário',  // aqui já inclui o nome recebido ou "Usuário" como padrão
       pontuacao: pontuacao + (acertou ? 1 : 0),
       totalPerguntas: perguntas.length,
       respostasUsuario: respostasCompletas,
