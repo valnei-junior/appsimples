@@ -8,6 +8,7 @@ import {
   PanResponder,
   Dimensions,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { useRouter, useSearchParams } from 'expo-router';
 import perguntasData from '../data/perguntas.json';
@@ -26,7 +27,8 @@ export default function Quiz() {
   const [mostrarResultado, setMostrarResultado] = useState(false);
   const [pontuacao, setPontuacao] = useState(0);
   const [respostasUsuario, setRespostasUsuario] = useState([]);
-
+  const [gifUrl, setGifUrl] = useState(null);
+  
   // Animações
   const slideAnim = new Animated.Value(0);
   const fadeAnim = new Animated.Value(1);
@@ -104,6 +106,28 @@ export default function Quiz() {
     },
   });
 
+  const fetchGif = async (type) => {
+    const apiKey = 'KZ6zQ1fvRWajOxuXnvce3uPFWYdgOUph';
+      const successWords = [
+    'success', 'yay', 'congratulations', 'winner', 'awesome', 'celebration', 'party', 'applause', 'happy', 'victory'
+  ];
+  const failWords = [
+    'fail', 'sad', 'try again', 'lost', 'defeat', 'nope', 'cry', 'error', 'wrong','bad luck', 'game over', 'incorrect'  ];
+    const wordList = type === 'success' ? successWords : failWords;
+  const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
+    try {
+      const response = await fetch(
+        `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${encodeURIComponent(randomWord)}&limit=1`
+      );
+      const data = await response.json();
+      console.log(data);
+      
+      setGifUrl(data.data[0]?.images?.downsized_medium?.url);
+    } catch {
+      setGifUrl(null);
+    }
+  };
+
   const voltarHome = () => {
     router.push('/');
   };
@@ -117,7 +141,11 @@ export default function Quiz() {
 
       const pergunta = perguntas[perguntaAtual];
       const acertou = indice === pergunta.respostaCorreta;
+      
+      // Fetch GIF
+      fetchGif(acertou ? 'success' : 'fail');
 
+      // 🔊 TOCAR SOM baseado na resposta (apenas se som estiver ativado)
       if (somAtivado) {
         if (acertou) {
           setPontuacao(pontuacao + 1);
@@ -137,21 +165,27 @@ export default function Quiz() {
       };
 
       setRespostasUsuario([...respostasUsuario, novaResposta]);
-
-      if (perguntaAtual < perguntas.length - 1) {
+      
+      // Auto-avança após 2 segundos se não for a última pergunta
+      if (perguntaAtual < perguntasData.length - 1) {
         setTimeout(() => {
           proximaPergunta();
-        }, 20);
+        }, 3000);
       } else {
+        // Se for a última pergunta, vai para resultado após 2 segundos
         setTimeout(() => {
           irParaResultado();
-        }, 20);
+        }, 3000);
       }
     }, 300);
   };
 
   const proximaPergunta = () => {
-    if (perguntaAtual < perguntas.length - 1) {
+    if (perguntaAtual < perguntasData.length - 1) {
+      // Limpa o GIF antes da próxima pergunta
+      setGifUrl(null);
+      
+      // Animação de saída
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: width,
@@ -325,24 +359,60 @@ export default function Quiz() {
         </View>
 
         {mostrarResultado && (
-          <View style={styles.feedback}>
-            <Animated.View style={[styles.feedbackContent, { opacity: fadeAnim }]}>
+          <View style={styles.modalOverlay}>
+            <Animated.View
+              style={[
+                styles.modalContainer,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ scale: fadeAnim }],
+                },
+              ]}
+            >
               {opcaoSelecionada === pergunta.respostaCorreta ? (
-                <View style={styles.feedbackCorreto}>
-                  <Text style={styles.feedbackEmoji}>🎉</Text>
-                  <Text style={styles.feedbackTexto}>Correto!</Text>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalEmoji}>🎉</Text>
+                  <Text style={styles.modalTitle}>Parabéns!</Text>
+                  <Text style={styles.modalSubtitle}>Resposta Correta</Text>
+                  {gifUrl && (
+                    <Image
+                      source={{ uri: gifUrl }}
+                      style={styles.modalGifImage}
+                      resizeMode="contain"
+                    />
+                  )}
+                  <View style={styles.modalFooter}>
+                    <Text style={styles.modalInstrucao}>
+                      {perguntaAtual < perguntasData.length - 1
+                        ? '👉 Deslize para continuar'
+                        : '🏁 Finalizando...'}
+                    </Text>
+                  </View>
                 </View>
               ) : (
-                <View style={styles.feedbackErrado}>
-                  <Text style={styles.feedbackEmoji}>😔</Text>
-                  <Text style={styles.feedbackTexto}>Ops! Tente novamente</Text>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalEmoji}>😔</Text>
+                  <Text style={styles.modalTitle}>Ops!</Text>
+                  <Text style={styles.modalSubtitle}>Resposta Incorreta</Text>
+                  {gifUrl && (
+                    <Image
+                      source={{ uri: gifUrl }}
+                      style={styles.modalGifImage}
+                      resizeMode="contain"
+                    />
+                  )}
+                  <Text style={styles.respostaCorretaTexto}>
+                    Resposta correta: {pergunta.opcoes[pergunta.respostaCorreta]}
+                  </Text>
+                  <View style={styles.modalFooter}>
+                    <Text style={styles.modalInstrucao}>
+                      {perguntaAtual < perguntasData.length - 1
+                        ? '👉 Deslize para continuar'
+                        : '🏁 Finalizando...'}
+                    </Text>
+                  </View>
                 </View>
               )}
-              <Text style={styles.proximaInstrucao}>
-                {perguntaAtual < perguntas.length - 1
-                  ? '👉 Deslize para a próxima pergunta'
-                  : '🏁 Finalizando quiz...'}
-              </Text>
             </Animated.View>
           </View>
         )}
@@ -537,48 +607,86 @@ const createStyles = (theme) =>
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  feedback: {
+  modalOverlay: {
     position: 'absolute',
-    bottom: 100,
+    top: 0,
     left: 0,
     right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 1000,
   },
-  feedbackContent: {
+  modalContainer: {
     backgroundColor: theme.cardBackground,
-    borderRadius: 15,
-    padding: 20,
+    borderRadius: 25,
     marginHorizontal: 30,
+    maxWidth: width * 0.85,
     shadowColor: theme.shadowColor,
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 10,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalContent: {
+    padding: 30,
     alignItems: 'center',
   },
-  feedbackCorreto: {
-    alignItems: 'center',
+  modalEmoji: {
+    fontSize: 60,
+    marginBottom: 15,
   },
-  feedbackErrado: {
-    alignItems: 'center',
-  },
-  feedbackEmoji: {
-    fontSize: 30,
-    marginBottom: 10,
-  },
-  feedbackTexto: {
-    fontSize: 18,
-    fontWeight: '600',
+  modalTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
     color: theme.textColor,
-    marginBottom: 10,
+    marginBottom: 8,
+    textAlign: 'center',
   },
-  proximaInstrucao: {
-    fontSize: 14,
+  modalSubtitle: {
+    fontSize: 18,
+    color: theme.secondaryColor,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalGifImage: {
+    width: 200,
+    height: 150,
+    marginVertical: 15,
+    borderRadius: 12,
+  },
+  respostaCorretaTexto: {
+    fontSize: 16,
+    color: theme.textColor,
+    textAlign: 'center',
+    backgroundColor: theme.isHighContrast ? '#00FF00' + '20' : '#e8f5e8',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 10,
+    marginBottom: 15,
+    fontWeight: '600',
+  },
+  modalFooter: {
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: theme.borderColor,
+    width: '100%',
+  },
+  modalInstrucao: {
+    fontSize: 16,
     color: theme.secondaryColor,
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  gifImage: {
+    width: 150,
+    height: 100,
+    marginVertical: 10,
+    borderRadius: 8,
   },
 });
