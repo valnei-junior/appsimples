@@ -11,12 +11,14 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import soundService from '../services/SimpleSoundService';
+import { useConfig } from '../contexts/ConfigContext';
 
 const { width, height } = Dimensions.get('window');
 
 export default function Resultado() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { theme, somAtivado } = useConfig();
   
   const pontuacao = parseInt(params.pontuacao) || 0;
   const totalPerguntas = parseInt(params.totalPerguntas) || 15;
@@ -41,12 +43,14 @@ export default function Resultado() {
   const mensagem = getMensagem();
 
   useEffect(() => {
-    // 🔊 Tocar som de vitória ao mostrar resultado
-    setTimeout(() => {
-      if (porcentagem >= 70) {
-        soundService.playVictory(); // Som de vitória para boas pontuações
-      }
-    }, 800); // Aguarda um pouco para as animações iniciarem
+    // 🔊 Tocar som de vitória ao mostrar resultado (apenas se som estiver ativado)
+    if (somAtivado) {
+      setTimeout(() => {
+        if (porcentagem >= 70) {
+          soundService.playVictory(); // Som de vitória para boas pontuações
+        }
+      }, 800); // Aguarda um pouco para as animações iniciarem
+    }
     
     // Sequência de animações
     Animated.sequence([
@@ -68,7 +72,7 @@ export default function Resultado() {
         }),
       ]),
     ]).start();
-  }, []);
+  }, [scaleAnim, fadeAnim, slideAnim, porcentagem, somAtivado]);
 
   const refazerQuiz = () => {
     router.push('/');
@@ -77,6 +81,8 @@ export default function Resultado() {
   const voltarHome = () => {
     router.push('/');
   };
+
+  const styles = createStyles(theme);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -189,10 +195,10 @@ export default function Resultado() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: theme.backgroundColor,
   },
   scrollContent: {
     flexGrow: 1,
@@ -220,11 +226,11 @@ const styles = StyleSheet.create({
   pontuacaoNumero: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: theme.textColor,
   },
   pontuacaoTexto: {
     fontSize: 16,
-    color: '#666',
+    color: theme.secondaryColor,
     fontWeight: '500',
   },
   porcentagem: {
@@ -238,16 +244,16 @@ const styles = StyleSheet.create({
   detalhesTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: theme.textColor,
     marginBottom: 20,
     textAlign: 'center',
   },
   respostaItem: {
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 12,
     padding: 15,
     marginBottom: 10,
-    shadowColor: '#000',
+    shadowColor: theme.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -265,7 +271,7 @@ const styles = StyleSheet.create({
   respostaNumero: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#666',
+    color: theme.secondaryColor,
   },
   respostaStatus: {
     paddingHorizontal: 12,
@@ -278,17 +284,17 @@ const styles = StyleSheet.create({
   },
   respostaPergunta: {
     fontSize: 14,
-    color: '#2c3e50',
+    color: theme.textColor,
     lineHeight: 20,
   },
   estatisticasContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 20,
     padding: 25,
     marginHorizontal: 20,
     marginBottom: 30,
-    shadowColor: '#000',
+    shadowColor: theme.shadowColor,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -303,18 +309,18 @@ const styles = StyleSheet.create({
   },
   divisor: {
     width: 1,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: theme.borderColor,
     marginHorizontal: 15,
   },
   estatisticaNumero: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'brown',
+    color: theme.infoColor,
     marginBottom: 5,
   },
   estatisticaTexto: {
     fontSize: 14,
-    color: '#666',
+    color: theme.secondaryColor,
     fontWeight: '500',
   },
   botoesContainer: {
@@ -322,10 +328,10 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   botaoRefazer: {
-    backgroundColor: 'brown',
+    backgroundColor: theme.buttonBackground,
     paddingVertical: 16,
     borderRadius: 25,
-    shadowColor: 'brown',
+    shadowColor: theme.buttonBackground,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -335,18 +341,18 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   textoBotaoRefazer: {
-    color: '#fff',
+    color: theme.buttonText,
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   botaoHome: {
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     paddingVertical: 16,
     borderRadius: 25,
     borderWidth: 2,
-    borderColor: '#3498db',
-    shadowColor: '#000',
+    borderColor: theme.primaryColor,
+    shadowColor: theme.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -356,10 +362,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   textoBotaoHome: {
-    color: '#3498db',
+    color: theme.primaryColor,
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
   },
-
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -8,25 +8,33 @@ import {
   Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import simpleSoundService from '../services/SimpleSoundService';
+import { useConfig } from '../contexts/ConfigContext';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 export default function Home() {
   const router = useRouter();
-  const [somAtivado, setSomAtivado] = useState(simpleSoundService.isEnabled);
+  const { somAtivado, toggleSound, theme } = useConfig();
 
   const iniciarQuiz = () => {
     router.push('/quiz');
   };
 
-  const toggleSom = () => {
-    const novoEstado = simpleSoundService.toggle();
-    setSomAtivado(novoEstado);
+  const abrirConfiguracoes = () => {
+    router.push('/configuracoes');
   };
+
+  const styles = createStyles(theme);
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Botão de Configuração no canto superior direito */}
+      <View style={styles.headerContainer}>
+        <TouchableOpacity style={styles.botaoConfig} onPress={abrirConfiguracoes}>
+          <Text style={styles.iconeConfig}>⚙️</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.titulo}>🧠</Text>
@@ -57,7 +65,7 @@ export default function Home() {
           <Text style={styles.textoBotao}>Iniciar Quiz</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.botaoSom} onPress={toggleSom}>
+        <TouchableOpacity style={styles.botaoSom} onPress={toggleSound}>
           <Text style={styles.textoBotaoSom}>
             {somAtivado ? '🔊 Som Ligado' : '🔇 Som Desligado'}
           </Text>
@@ -71,10 +79,35 @@ export default function Home() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: theme.backgroundColor,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  botaoConfig: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.cardBackground,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.shadowColor,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  iconeConfig: {
+    fontSize: 20,
   },
   content: {
     flex: 1,
@@ -93,23 +126,23 @@ const styles = StyleSheet.create({
   subtitulo: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: 'brown',
+    color: theme.primaryColor,
     marginBottom: 10,
     textAlign: 'center',
   },
   descricao: {
     fontSize: 18,
-    color: '#666',
+    color: theme.secondaryColor,
     textAlign: 'center',
     lineHeight: 24,
   },
   infoContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 20,
     padding: 25,
     marginBottom: 40,
-    shadowColor: '#000',
+    shadowColor: theme.shadowColor,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -125,26 +158,26 @@ const styles = StyleSheet.create({
   },
   divisor: {
     width: 1,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: theme.borderColor,
     marginHorizontal: 15,
   },
   infoNumero: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'brown',
+    color: theme.infoColor,
     marginBottom: 5,
   },
   infoTexto: {
     fontSize: 14,
-    color: '#666',
+    color: theme.secondaryColor,
     fontWeight: '500',
   },
   botaoIniciar: {
-    backgroundColor: 'brown',
+    backgroundColor: theme.buttonBackground,
     paddingVertical: 18,
     paddingHorizontal: 50,
     borderRadius: 30,
-    shadowColor: 'brown',
+    shadowColor: theme.buttonBackground,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -155,7 +188,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   textoBotao: {
-    color: '#fff',
+    color: theme.buttonText,
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
