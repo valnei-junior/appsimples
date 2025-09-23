@@ -9,7 +9,7 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useSearchParams } from 'expo-router';
 import perguntasData from '../data/perguntas.json';
 import soundService from '../services/SimpleSoundService';
 import { useConfig } from '../contexts/ConfigContext';
@@ -18,18 +18,71 @@ const { width } = Dimensions.get('window');
 
 export default function Quiz() {
   const router = useRouter();
+  const { nome } = useSearchParams();
   const { theme, somAtivado } = useConfig();
+  const [perguntas, setPerguntas] = useState([]); // Estado local para perguntas embaralhadas
   const [perguntaAtual, setPerguntaAtual] = useState(0);
   const [opcaoSelecionada, setOpcaoSelecionada] = useState(null);
   const [mostrarResultado, setMostrarResultado] = useState(false);
   const [pontuacao, setPontuacao] = useState(0);
   const [respostasUsuario, setRespostasUsuario] = useState([]);
-  
+
   // Animações
   const slideAnim = new Animated.Value(0);
   const fadeAnim = new Animated.Value(1);
 
-  // Configuração do gesto de swipe
+  // Função para embaralhar array (Fisher-Yates)
+  function shuffleArray(array) {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  }
+
+  // Função que embaralha as opções da pergunta e ajusta índice da resposta correta
+  function shuffleOptions(pergunta) {
+    const opcoes = [...pergunta.opcoes];
+    const indiceCorretoOriginal = pergunta.respostaCorreta;
+
+    const opcoesComFlag = opcoes.map((opcao, index) => ({
+      texto: opcao,
+      correta: index === indiceCorretoOriginal,
+    }));
+
+    const opcoesEmbaralhadas = shuffleArray(opcoesComFlag);
+
+    const novoIndiceCorreto = opcoesEmbaralhadas.findIndex(o => o.correta);
+
+    return {
+      ...pergunta,
+      opcoes: opcoesEmbaralhadas.map(o => o.texto),
+      respostaCorreta: novoIndiceCorreto,
+    };
+  }
+
+  useEffect(() => {
+    // Embaralha perguntas e opções no início do quiz
+    let perguntasEmbaralhadas = shuffleArray(perguntasData);
+    perguntasEmbaralhadas = perguntasEmbaralhadas.map(pergunta => shuffleOptions(pergunta));
+    setPerguntas(perguntasEmbaralhadas);
+
+    // Animações iniciais
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: (evt, gestureState) => {
       return Math.abs(gestureState.dx) > 20 && Math.abs(gestureState.dy) < 100;
@@ -41,10 +94,8 @@ export default function Quiz() {
     },
     onPanResponderRelease: (evt, gestureState) => {
       if (gestureState.dx > width * 0.3 && opcaoSelecionada !== null && mostrarResultado) {
-        // Swipe para a direita suficiente - próxima pergunta
         proximaPergunta();
       } else {
-        // Volta para posição original
         Animated.spring(slideAnim, {
           toValue: 0,
           useNativeDriver: true,
@@ -59,46 +110,39 @@ export default function Quiz() {
 
   const selecionarOpcao = (indice) => {
     if (mostrarResultado) return;
-    
     setOpcaoSelecionada(indice);
-    
-    // Aguarda um momento antes de mostrar o resultado
+
     setTimeout(() => {
       setMostrarResultado(true);
-      
-      // Verifica se a resposta está correta
-      const pergunta = perguntasData[perguntaAtual];
+
+      const pergunta = perguntas[perguntaAtual];
       const acertou = indice === pergunta.respostaCorreta;
-      
-      // 🔊 TOCAR SOM baseado na resposta (apenas se som estiver ativado)
+
       if (somAtivado) {
         if (acertou) {
           setPontuacao(pontuacao + 1);
-          soundService.playCorrect(); // Som de acerto
+          soundService.playCorrect();
         } else {
-          soundService.playWrong(); // Som de erro
+          soundService.playWrong();
         }
       } else if (acertou) {
         setPontuacao(pontuacao + 1);
       }
-      
-      // Armazena a resposta do usuário
+
       const novaResposta = {
         pergunta: pergunta.pergunta,
         opcaoSelecionada: indice,
         respostaCorreta: pergunta.respostaCorreta,
-        acertou: acertou,
+        acertou,
       };
-      
+
       setRespostasUsuario([...respostasUsuario, novaResposta]);
-      
-      // Auto-avança após 0,2 segundos se não for a última pergunta
-      if (perguntaAtual < perguntasData.length - 1) {
+
+      if (perguntaAtual < perguntas.length - 1) {
         setTimeout(() => {
           proximaPergunta();
         }, 20);
       } else {
-        // Se for a última pergunta, vai para resultado após 0,2 segundos
         setTimeout(() => {
           irParaResultado();
         }, 20);
@@ -107,8 +151,7 @@ export default function Quiz() {
   };
 
   const proximaPergunta = () => {
-    if (perguntaAtual < perguntasData.length - 1) {
-      // Animação de saída
+    if (perguntaAtual < perguntas.length - 1) {
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: width,
@@ -121,16 +164,13 @@ export default function Quiz() {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        // Resetar estado para próxima pergunta
         setPerguntaAtual(perguntaAtual + 1);
         setOpcaoSelecionada(null);
         setMostrarResultado(false);
-        
-        // Reset animações
+
         slideAnim.setValue(-width);
         fadeAnim.setValue(0);
-        
-        // Animação de entrada
+
         Animated.parallel([
           Animated.timing(slideAnim, {
             toValue: 0,
@@ -150,89 +190,76 @@ export default function Quiz() {
   };
 
   const irParaResultado = () => {
-    const perguntaFinal = perguntasData[perguntaAtual];
+    const perguntaFinal = perguntas[perguntaAtual];
     const acertou = opcaoSelecionada === perguntaFinal?.respostaCorreta;
 
     const ultimaResposta = {
       pergunta: perguntaFinal.pergunta,
-      opcaoSelecionada: opcaoSelecionada,
+      opcaoSelecionada,
       respostaCorreta: perguntaFinal.respostaCorreta,
-      acertou: acertou,
+      acertou,
     };
 
     const respostasCompletas = [...respostasUsuario, ultimaResposta];
 
     const resultadoFinal = {
+      nome: nome || 'Usuário',  // aqui já inclui o nome recebido ou "Usuário" como padrão
       pontuacao: pontuacao + (acertou ? 1 : 0),
-      totalPerguntas: perguntasData.length,
+      totalPerguntas: perguntas.length,
       respostasUsuario: respostasCompletas,
     };
 
     router.push({
       pathname: '/resultado',
       params: {
+        nome: resultadoFinal.nome,
         pontuacao: resultadoFinal.pontuacao,
         totalPerguntas: resultadoFinal.totalPerguntas,
-        respostasString: JSON.stringify(resultadoFinal.respostasUsuario)
-      }
+        respostasString: JSON.stringify(resultadoFinal.respostasUsuario),
+      },
     });
   };
 
-  // Efeito para animação inicial
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [slideAnim, fadeAnim]);
-
-  const pergunta = perguntasData[perguntaAtual];
-
-  if (!pergunta) {
+  if (perguntas.length === 0) {
+    // Ainda não carregou perguntas embaralhadas
     return null;
   }
 
+  const pergunta = perguntas[perguntaAtual];
+
   const getOpcaoStyle = (index) => {
     const styles = createStyles(theme);
-    
+
     if (!mostrarResultado) {
       return opcaoSelecionada === index ? styles.opcaoSelecionada : styles.opcao;
     }
-    
+
     if (index === pergunta.respostaCorreta) {
       return styles.opcaoCorreta;
     }
-    
+
     if (opcaoSelecionada === index && index !== pergunta.respostaCorreta) {
       return styles.opcaoErrada;
     }
-    
+
     return styles.opcaoDesabilitada;
   };
 
   const getTextoStyle = (index) => {
     const styles = createStyles(theme);
-    
+
     if (!mostrarResultado) {
       return opcaoSelecionada === index ? styles.textoSelecionado : styles.textoOpcao;
     }
-    
+
     if (index === pergunta.respostaCorreta) {
       return styles.textoCorreto;
     }
-    
+
     if (opcaoSelecionada === index && index !== pergunta.respostaCorreta) {
       return styles.textoErrado;
     }
-    
+
     return styles.textoDesabilitado;
   };
 
@@ -256,7 +283,7 @@ export default function Quiz() {
               style={[
                 styles.progressFill,
                 {
-                  width: `${((perguntaAtual + 1) / perguntasData.length) * 100}%`,
+                  width: `${((perguntaAtual + 1) / perguntas.length) * 100}%`,
                 },
               ]}
             />
@@ -267,7 +294,7 @@ export default function Quiz() {
         <View style={styles.perguntaSection}>
           <View style={styles.perguntaHeader}>
             <Text style={styles.contador}>
-              Pergunta {perguntaAtual + 1} de {perguntasData.length}
+              Pergunta {perguntaAtual + 1} de {perguntas.length}
             </Text>
           </View>
           <View style={styles.perguntaContainer}>
@@ -286,16 +313,12 @@ export default function Quiz() {
               activeOpacity={0.7}
             >
               <View style={styles.opcaoContent}>
-                <Text style={styles.letra}>
-                  {String.fromCharCode(65 + index)}
-                </Text>
-                <Text style={[styles.textoOpcao, getTextoStyle(index)]}>
-                  {opcao}
-                </Text>
+                <Text style={styles.letra}>{String.fromCharCode(65 + index)}</Text>
+                <Text style={[styles.textoOpcao, getTextoStyle(index)]}>{opcao}</Text>
               </View>
             </TouchableOpacity>
           ))}
-          
+
           <TouchableOpacity style={styles.botaoHome} onPress={voltarHome}>
             <Text style={styles.textoBotaoHome}>🏠 Voltar ao Início</Text>
           </TouchableOpacity>
@@ -303,14 +326,7 @@ export default function Quiz() {
 
         {mostrarResultado && (
           <View style={styles.feedback}>
-            <Animated.View
-              style={[
-                styles.feedbackContent,
-                {
-                  opacity: fadeAnim,
-                },
-              ]}
-            >
+            <Animated.View style={[styles.feedbackContent, { opacity: fadeAnim }]}>
               {opcaoSelecionada === pergunta.respostaCorreta ? (
                 <View style={styles.feedbackCorreto}>
                   <Text style={styles.feedbackEmoji}>🎉</Text>
@@ -323,7 +339,7 @@ export default function Quiz() {
                 </View>
               )}
               <Text style={styles.proximaInstrucao}>
-                {perguntaAtual < perguntasData.length - 1
+                {perguntaAtual < perguntas.length - 1
                   ? '👉 Deslize para a próxima pergunta'
                   : '🏁 Finalizando quiz...'}
               </Text>
@@ -335,95 +351,96 @@ export default function Quiz() {
   );
 }
 
-const createStyles = (theme) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.backgroundColor,
-  },
-  content: {
-    flex: 1,
-    paddingTop: 20,
-  },
-  progressContainer: {
-    marginHorizontal: 20,
-    marginBottom: 5,
-    marginTop: 40,
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: theme.borderColor,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: theme.primaryColor,
-    borderRadius: 3,
-  },
-  perguntaSection: {
-    marginBottom: 30,
-    marginTop: 20,
-  },
-  perguntaHeader: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  contador: {
-    fontSize: 16,
-    color: theme.secondaryColor,
-    fontWeight: '600',
-  },
-  perguntaContainer: {
-    backgroundColor: theme.cardBackground,
-    padding: 25,
-    borderRadius: 15,
-    marginHorizontal: 10,
-    shadowColor: theme.shadowColor,
-    shadowOffset: {
-      width: 0,
-      height: 2,
+const createStyles = (theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.backgroundColor,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  perguntaTexto: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: theme.textColor,
-    textAlign: 'center',
-    lineHeight: 28,
-  },
-  opcoesContainer: {
-    marginHorizontal: 20,
-  },
-  opcao: {
-    backgroundColor: theme.cardBackground,
-    borderRadius: 12,
-    marginVertical: 8,
-    borderWidth: 2,
-    borderColor: theme.borderColor,
-    shadowColor: theme.shadowColor,
-    shadowOffset: {
-      width: 0,
-      height: 1,
+    content: {
+      flex: 1,
+      paddingTop: 20,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  opcaoSelecionada: {
-    backgroundColor: theme.isHighContrast ? theme.primaryColor + '20' : '#e3f2fd',
-    borderRadius: 12,
-    marginVertical: 8,
-    borderWidth: 2,
-    borderColor: theme.primaryColor,
-    shadowColor: theme.primaryColor,
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    progressContainer: {
+      marginHorizontal: 20,
+      marginBottom: 5,
+      marginTop: 40,
     },
-    shadowOpacity: 0.2,
+    progressBar: {
+      height: 6,
+      backgroundColor: theme.borderColor,
+      borderRadius: 3,
+      overflow: 'hidden',
+    },
+    progressFill: {
+      height: '100%',
+      backgroundColor: theme.primaryColor,
+      borderRadius: 3,
+    },
+    perguntaSection: {
+      marginBottom: 30,
+      marginTop: 20,
+    },
+    perguntaHeader: {
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    contador: {
+      fontSize: 16,
+      color: theme.secondaryColor,
+      fontWeight: '600',
+    },
+    perguntaContainer: {
+      backgroundColor: theme.cardBackground,
+      padding: 25,
+      borderRadius: 15,
+      marginHorizontal: 10,
+      shadowColor: theme.shadowColor,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    perguntaTexto: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: theme.textColor,
+      textAlign: 'center',
+      lineHeight: 28,
+    },
+    opcoesContainer: {
+      marginHorizontal: 20,
+    },
+    opcao: {
+      backgroundColor: theme.cardBackground,
+      borderRadius: 12,
+      marginVertical: 8,
+      borderWidth: 2,
+      borderColor: theme.borderColor,
+      shadowColor: theme.shadowColor,
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    opcaoSelecionada: {
+      backgroundColor: theme.isHighContrast ? theme.primaryColor + '20' : '#e3f2fd',
+      borderRadius: 12,
+      marginVertical: 8,
+      borderWidth: 2,
+      borderColor: theme.primaryColor,
+      shadowColor: theme.primaryColor,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
   },
