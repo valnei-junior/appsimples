@@ -8,6 +8,7 @@ import {
   PanResponder,
   Text,
   Dimensions,
+  Image,
 } from 'react-native';
 import Pergunta from '../components/Pergunta';
 import Opcoes from '../components/Opcoes';
@@ -21,6 +22,7 @@ const Quiz = ({ navigation }) => {
   const [mostrarResultado, setMostrarResultado] = useState(false);
   const [pontuacao, setPontuacao] = useState(0);
   const [respostasUsuario, setRespostasUsuario] = useState([]);
+  const [gifUrl, setGifUrl] = useState(null);
   
   // Animações
   const slideAnim = new Animated.Value(0);
@@ -51,6 +53,8 @@ const Quiz = ({ navigation }) => {
   });
 
   const selecionarOpcao = (indice) => {
+    console.log('selecionarOpcao called with:', indice);
+    
     if (mostrarResultado) return;
     
     setOpcaoSelecionada(indice);
@@ -63,6 +67,9 @@ const Quiz = ({ navigation }) => {
       const pergunta = perguntasData[perguntaAtual];
       const acertou = indice === pergunta.respostaCorreta;
       
+      // Fetch GIF
+      fetchGif(acertou ? 'success' : 'fail');
+
       if (acertou) {
         setPontuacao(pontuacao + 1);
       }
@@ -160,6 +167,23 @@ const Quiz = ({ navigation }) => {
     ]).start();
   }, []);
 
+const fetchGif = async (type) => {
+  const apiKey = 'KZ6zQ1fvRWajOxuXnvce3uPFWYdgOUph';
+  const query = type === 'success' ? 'success' : 'fail';
+  console.log(`Fetching GIF for ${query}`);
+  try {
+    const response = await fetch(
+      `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${query}&limit=1`
+    );
+    const data = await response.json();
+    console.log(data);
+    
+    setGifUrl(data.data[0]?.images?.downsized_medium?.url);
+  } catch {
+    setGifUrl(null);
+  }
+};
+
   const pergunta = perguntasData[perguntaAtual];
 
   if (!pergunta) {
@@ -168,6 +192,7 @@ const Quiz = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+   <SafeAreaView style={styles.container}>
       <Animated.View
         style={[
           styles.content,
@@ -235,6 +260,8 @@ const Quiz = ({ navigation }) => {
           </View>
         )}
       </Animated.View>
+    </SafeAreaView>
+
     </SafeAreaView>
   );
 };
