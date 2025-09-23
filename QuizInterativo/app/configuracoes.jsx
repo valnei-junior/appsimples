@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   View,
   Text,
@@ -10,16 +10,28 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useConfig } from '../contexts/ConfigContext';
+import { AccessibilityContext } from '../utils/AccessibilityContext';
 
 export default function Configuracoes() {
   const router = useRouter();
-  const { isHighContrast, somAtivado, toggleHighContrast, toggleSound, theme } = useConfig();
+  
+  // Acessa as configurações de tema e som
+  const {
+    isHighContrast,
+    somAtivado,
+    toggleHighContrast,
+    toggleSound,
+    theme,
+  } = useConfig();
+
+  // Acessa as configurações de acessibilidade da fonte
+  const { fontSize, increaseFont, decreaseFont } = useContext(AccessibilityContext);
 
   const voltar = () => {
     router.back();
   };
 
-  const styles = createStyles(theme);
+  const styles = createStyles(theme, fontSize);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -32,9 +44,9 @@ export default function Configuracoes() {
       </View>
 
       <ScrollView style={styles.conteudo} showsVerticalScrollIndicator={false}>
+        {/* Aparência */}
         <View style={styles.secao}>
           <Text style={styles.tituloSecao}>🎨 Aparência</Text>
-          
           <View style={styles.opcao}>
             <View style={styles.opcaoTexto}>
               <Text style={styles.opcaoTitulo}>Alto Contraste</Text>
@@ -52,14 +64,12 @@ export default function Configuracoes() {
           </View>
         </View>
 
+        {/* Áudio */}
         <View style={styles.secao}>
           <Text style={styles.tituloSecao}>🔊 Áudio</Text>
-          
           <View style={styles.opcao}>
             <View style={styles.opcaoTexto}>
-              <View style={styles.opcaoTitulo}>
-                <Text style={styles.opcaoTitulo}>Efeitos Sonoros</Text>
-              </View>
+              <Text style={styles.opcaoTitulo}>Efeitos Sonoros</Text>
               <Text style={styles.opcaoDescricao}>
                 Ativa ou desativa os sons do quiz
               </Text>
@@ -74,9 +84,36 @@ export default function Configuracoes() {
           </View>
         </View>
 
+        {/* Acessibilidade */}
+        <View style={styles.secao}>
+          <Text style={styles.tituloSecao}>♿ Acessibilidade</Text>
+          <View style={styles.opcao}>
+            <View style={styles.opcaoTexto}>
+              <Text style={styles.opcaoTitulo}>Tamanho da Fonte</Text>
+              <Text style={styles.opcaoDescricao}>
+                Ajuste o tamanho do texto para melhor leitura
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity
+                style={styles.botaoFonte}
+                onPress={decreaseFont} // Corrigido para chamar a função do AccessibilityContext
+              >
+                <Text style={styles.botaoTexto}>A-</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.botaoFonte}
+                onPress={increaseFont} // Corrigido para chamar a função do AccessibilityContext
+              >
+                <Text style={styles.botaoTexto}>A+</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        {/* Informações */}
         <View style={styles.secao}>
           <Text style={styles.tituloSecao}>ℹ️ Informações</Text>
-          
           <View style={styles.infoCard}>
             <Text style={styles.infoTitulo}>Sobre o Quiz</Text>
             <Text style={styles.infoTexto}>
@@ -99,104 +136,111 @@ export default function Configuracoes() {
   );
 }
 
-const createStyles = (theme) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.backgroundColor,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.borderColor,
-  },
-  botaoVoltar: {
-    padding: 5,
-  },
-  textoVoltar: {
-    fontSize: 16,
-    color: theme.primaryColor,
-    fontWeight: '600',
-  },
-  titulo: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: theme.textColor,
-  },
-  espacoVazio: {
-    width: 60, // Para equilibrar o layout
-  },
-  conteudo: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  secao: {
-    marginTop: 30,
-  },
-  tituloSecao: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: theme.textColor,
-    marginBottom: 15,
-  },
-  opcao: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: theme.cardBackground,
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 10,
-    shadowColor: theme.shadowColor,
-    shadowOffset: {
-      width: 0,
-      height: 2,
+const createStyles = (theme, fontSize) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.backgroundColor,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  opcaoTexto: {
-    flex: 1,
-    marginRight: 15,
-  },
-  opcaoTitulo: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.textColor,
-    marginBottom: 5,
-  },
-  opcaoDescricao: {
-    fontSize: 14,
-    color: theme.secondaryColor,
-    lineHeight: 20,
-  },
-  infoCard: {
-    backgroundColor: theme.cardBackground,
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 15,
-    shadowColor: theme.shadowColor,
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.borderColor,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  infoTitulo: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.textColor,
-    marginBottom: 10,
-  },
-  infoTexto: {
-    fontSize: 14,
-    color: theme.secondaryColor,
-    lineHeight: 20,
-  },
-});
+    botaoVoltar: {
+      padding: 5,
+    },
+    textoVoltar: {
+      fontSize: fontSize,
+      color: theme.primaryColor,
+      fontWeight: '600',
+    },
+    titulo: {
+      fontSize: fontSize + 4, // Exemplo de ajuste proporcional
+      fontWeight: 'bold',
+      color: theme.textColor,
+    },
+    espacoVazio: {
+      width: 60,
+    },
+    conteudo: {
+      flex: 1,
+      paddingHorizontal: 20,
+    },
+    secao: {
+      marginTop: 30,
+    },
+    tituloSecao: {
+      fontSize: fontSize + 2, // Exemplo de ajuste proporcional
+      fontWeight: 'bold',
+      color: theme.textColor,
+      marginBottom: 15,
+    },
+    opcao: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: theme.cardBackground,
+      padding: 20,
+      borderRadius: 15,
+      marginBottom: 10,
+      shadowColor: theme.shadowColor,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    opcaoTexto: {
+      flex: 1,
+      marginRight: 15,
+    },
+    opcaoTitulo: {
+      fontSize: fontSize,
+      fontWeight: '600',
+      color: theme.textColor,
+      marginBottom: 5,
+    },
+    opcaoDescricao: {
+      fontSize: fontSize - 2,
+      color: theme.secondaryColor,
+      lineHeight: fontSize + 4,
+    },
+    botaoFonte: {
+      backgroundColor: theme.primaryColor,
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+      marginHorizontal: 5,
+    },
+    botaoTexto: {
+      fontSize: fontSize,
+      fontWeight: 'bold',
+      color: theme.buttonText,
+    },
+    infoCard: {
+      backgroundColor: theme.cardBackground,
+      padding: 20,
+      borderRadius: 15,
+      marginBottom: 15,
+      shadowColor: theme.shadowColor,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    infoTitulo: {
+      fontSize: fontSize,
+      fontWeight: '600',
+      color: theme.textColor,
+      marginBottom: 10,
+    },
+    infoTexto: {
+      fontSize: fontSize - 2,
+      color: theme.secondaryColor,
+      lineHeight: fontSize + 4,
+    },
+  });
