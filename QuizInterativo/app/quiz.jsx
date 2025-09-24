@@ -229,7 +229,7 @@ export default function Quiz() {
   router.push({
     pathname: '/resultado',
     params: {
-      nome: resultadoFinal.nome,
+      nome: resultadoFinal.nomeUsuario,
       pontuacao: resultadoFinal.pontuacao,
       totalPerguntas: resultadoFinal.totalPerguntas,
       respostasString: JSON.stringify(resultadoFinal.respostasUsuario),
