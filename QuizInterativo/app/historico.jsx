@@ -51,7 +51,7 @@ export default function Historico() {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [fadeAnim, slideAnim]);
 
   // Função para formatar data legível
   const formatarData = (isoString) => {
@@ -85,7 +85,7 @@ export default function Historico() {
           historico.map((item, index) => (
             <View key={index} style={styles.itemContainer}>
               <View style={styles.itemHeader}>
-                <Text style={styles.nome}>{item.nome}</Text>
+                <Text style={styles.nome}>{item.nomeUsuario}</Text>
                 <Text style={styles.data}>{formatarData(item.data)}</Text>
               </View>
               <View style={styles.itemBody}>

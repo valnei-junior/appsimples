@@ -10,6 +10,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 import perguntasData from '../data/perguntas.json';
 import soundService from '../services/SimpleSoundService';
 import { useConfig } from '../contexts/ConfigContext';
@@ -224,17 +226,19 @@ export default function Quiz() {
     await AsyncStorage.setItem('@historico_resultados', JSON.stringify(novoHistorico));
   } catch (e) {
     console.error('Erro ao salvar resultado:', e);
+    Alert.alert('Erro', 'Não foi possível salvar o resultado. Por favor, tente novamente.');
   }
 
   router.push({
-    pathname: '/resultado',
-    params: {
-      nome: resultadoFinal.nome,
-      pontuacao: resultadoFinal.pontuacao,
-      totalPerguntas: resultadoFinal.totalPerguntas,
-      respostasString: JSON.stringify(resultadoFinal.respostasUsuario),
-    },
-  });
+  pathname: '/resultado',
+  params: {
+    nomeUsuario: resultadoFinal.nome,
+    pontuacao: resultadoFinal.pontuacao,
+    totalPerguntas: resultadoFinal.totalPerguntas,
+    respostasString: JSON.stringify(resultadoFinal.respostasUsuario),
+  },
+});
+
 };
 
 
