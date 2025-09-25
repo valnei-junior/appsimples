@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+
 import perguntasData from '../data/perguntas.json';
 import soundService from '../services/SimpleSoundService';
 import { useConfig } from '../contexts/ConfigContext';
@@ -19,6 +19,7 @@ const { width } = Dimensions.get('window');
 
 export default function Quiz() {
   const router = useRouter();
+
   const { theme, somAtivado } = useConfig();
   const [perguntas, setPerguntas] = useState([]); // Estado local para perguntas embaralhadas
   const [perguntaAtual, setPerguntaAtual] = useState(0);
@@ -222,35 +223,51 @@ export default function Quiz() {
     }
   };
 
-  const irParaResultado = () => {
-    const perguntaFinal = perguntas[perguntaAtual];
-    const acertou = opcaoSelecionada === perguntaFinal?.respostaCorreta;
+  const irParaResultado = async () => {
+  const perguntaFinal = perguntas[perguntaAtual];
+  const acertou = opcaoSelecionada === perguntaFinal?.respostaCorreta;
 
-    const ultimaResposta = {
-      pergunta: perguntaFinal.pergunta,
-      opcaoSelecionada,
-      respostaCorreta: perguntaFinal.respostaCorreta,
-      acertou,
-    };
-
-    const respostasCompletas = [...respostasUsuario, ultimaResposta];
-
-    const resultadoFinal = {
-      pontuacao: pontuacao + (acertou ? 1 : 0),
-      totalPerguntas: perguntas.length,
-      respostasUsuario: respostasCompletas,
-    };
-
-    router.push({
-      pathname: '/resultado',
-      params: {
-        nome: resultadoFinal.nome,
-        pontuacao: resultadoFinal.pontuacao,
-        totalPerguntas: resultadoFinal.totalPerguntas,
-        respostasString: JSON.stringify(resultadoFinal.respostasUsuario),
-      },
-    });
+  const ultimaResposta = {
+    pergunta: perguntaFinal.pergunta,
+    opcaoSelecionada,
+    respostaCorreta: perguntaFinal.respostaCorreta,
+    acertou,
   };
+
+  const respostasCompletas = [...respostasUsuario, ultimaResposta];
+
+
+
+  const resultadoFinal = {
+    nome,
+    pontuacao: pontuacaoFinal,
+    totalPerguntas,
+    porcentagem,
+    respostasUsuario: respostasCompletas,
+    data: new Date().toISOString(),
+  };
+
+  try {
+    const historicoAnteriorJSON = await AsyncStorage.getItem('@historico_resultados');
+    const historicoAnterior = historicoAnteriorJSON ? JSON.parse(historicoAnteriorJSON) : [];
+
+    const novoHistorico = [resultadoFinal, ...historicoAnterior];
+    await AsyncStorage.setItem('@historico_resultados', JSON.stringify(novoHistorico));
+  } catch (e) {
+    console.error('Erro ao salvar resultado:', e);
+  }
+
+  router.push({
+    pathname: '/resultado',
+    params: {
+      nome: resultadoFinal.nomeUsuario,
+      pontuacao: resultadoFinal.pontuacao,
+      totalPerguntas: resultadoFinal.totalPerguntas,
+      respostasString: JSON.stringify(resultadoFinal.respostasUsuario),
+    },
+  });
+};
+
 
   if (perguntas.length === 0) {
     // Ainda não carregou perguntas embaralhadas
@@ -681,10 +698,4 @@ const createStyles = (theme) =>
     textAlign: 'center',
     fontStyle: 'italic',
   },
-  gifImage: {
-    width: 150,
-    height: 100,
-    marginVertical: 10,
-    borderRadius: 8,
-  },
-});
+
