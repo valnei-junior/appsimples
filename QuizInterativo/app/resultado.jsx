@@ -12,28 +12,31 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import soundService from '../services/SimpleSoundService';
 import { useConfig } from '../contexts/ConfigContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 export default function Resultado() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { theme, somAtivado } = useConfig();
 
+  const nome = params.nomeUsuario || 'Anônimo';
   const pontuacao = parseInt(params.pontuacao) || 0;
   const totalPerguntas = parseInt(params.totalPerguntas) || 15;
-  const respostasUsuario = params.respostasString
-    ? JSON.parse(params.respostasString)
-    : [];
+  const respostasUsuario = (() => {
+    try {
+      return params.respostasString ? JSON.parse(params.respostasString) : [];
+    } catch {
+      return [];
+    }
+  })();
+
+  const porcentagem = Math.round((pontuacao / totalPerguntas) * 100);
 
   // Animações
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
-
-  const porcentagem = Math.round((pontuacao / totalPerguntas) * 100);
 
   const getMensagem = () => {
     if (porcentagem >= 90) return { emoji: '🏆', texto: 'Excelente!', cor: '#f39c12' };
@@ -72,60 +75,18 @@ export default function Resultado() {
         }),
       ]),
     ]).start();
-  }, [scaleAnim, fadeAnim, slideAnim, porcentagem, somAtivado]);
+  }, [porcentagem, somAtivado]);
 
-  // Salvar resultado no AsyncStorage
-useEffect(() => {
-  const salvarResultado = async () => {
-    try {
-      const nome = params.nomeUsuario || 'Anônimo';
-      const novoResultado = {
-        nome,
-        pontuacao,
-        totalPerguntas,
-        porcentagem,
-        data: new Date().toISOString(),
-      };
-
-      const historicoJSON = await AsyncStorage.getItem('@historico_resultados');
-      const historicoAtual = historicoJSON ? JSON.parse(historicoJSON) : [];
-
-      const novoHistorico = [novoResultado, ...historicoAtual]; // Adiciona no topo
-      await AsyncStorage.setItem('@historico_resultados', JSON.stringify(novoHistorico));
-    } catch (error) {
-      console.error('Erro ao salvar resultado:', error);
-    }
-  };
-
-  salvarResultado();
-}, []);
-
-
-  const refazerQuiz = () => {
-    router.push('/');
-  };
-
-  const voltarHome = () => {
-    router.push('/');
-  };
-
-  const irParaHistorico = () => {
-    router.push('/historico');
-  };
+  const voltarHome = () => router.push('/');
+  const irParaHistorico = () => router.push('/historico');
 
   const styles = createStyles(theme);
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Animated.View
-          style={[
-            styles.headerContainer,
-            {
-              transform: [{ scale: scaleAnim }],
-            },
-          ]}
-        >
+        {/* Cabeçalho com pontuação e emoji */}
+        <Animated.View style={[styles.headerContainer, { transform: [{ scale: scaleAnim }] }]}>
           <Text style={styles.emoji}>{mensagem.emoji}</Text>
           <Text style={[styles.mensagem, { color: mensagem.cor }]}>
             {mensagem.texto}
@@ -141,15 +102,8 @@ useEffect(() => {
           </Text>
         </Animated.View>
 
-        <Animated.View
-          style={[
-            styles.detalhesContainer,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
-        >
+        {/* Resumo das perguntas */}
+        <Animated.View style={[styles.detalhesContainer, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <Text style={styles.detalhesTitle}>Resumo das Respostas</Text>
           {respostasUsuario.map((resposta, index) => (
             <View key={index} style={styles.respostaItem}>
@@ -178,15 +132,8 @@ useEffect(() => {
           ))}
         </Animated.View>
 
-        <Animated.View
-          style={[
-            styles.estatisticasContainer,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
-        >
+        {/* Estatísticas */}
+        <Animated.View style={[styles.estatisticasContainer, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <View style={styles.estatisticaItem}>
             <Text style={styles.estatisticaNumero}>{pontuacao}</Text>
             <Text style={styles.estatisticaTexto}>Acertos</Text>
@@ -203,16 +150,9 @@ useEffect(() => {
           </View>
         </Animated.View>
 
-        <Animated.View
-          style={[
-            styles.botoesContainer,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
-        >
-          <TouchableOpacity style={styles.botaoRefazer} onPress={refazerQuiz}>
+        {/* Botões */}
+        <Animated.View style={[styles.botoesContainer, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+          <TouchableOpacity style={styles.botaoRefazer} onPress={voltarHome}>
             <Text style={styles.textoBotaoRefazer}>🔄 Refazer Quiz</Text>
           </TouchableOpacity>
 
@@ -228,6 +168,7 @@ useEffect(() => {
     </SafeAreaView>
   );
 }
+
 
 const createStyles = (theme) =>
   StyleSheet.create({
