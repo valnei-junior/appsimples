@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
   Animated,
   Dimensions,
 } from 'react-native';
@@ -53,7 +52,6 @@ export default function Historico() {
     ]).start();
   }, [fadeAnim, slideAnim]);
 
-  // Função para formatar data legível
   const formatarData = (isoString) => {
     const data = new Date(isoString);
     return data.toLocaleDateString('pt-BR', {

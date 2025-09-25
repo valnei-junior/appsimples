@@ -10,6 +10,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import soundService from '../services/SimpleSoundService';
 import { useConfig } from '../contexts/ConfigContext';
 
@@ -33,21 +34,54 @@ export default function Resultado() {
 
   const porcentagem = Math.round((pontuacao / totalPerguntas) * 100);
 
-  // Animações
+  // Controle de animações
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
 
-  const getMensagem = () => {
-    if (porcentagem >= 90) return { emoji: '🏆', texto: 'Excelente!', cor: '#f39c12' };
-    if (porcentagem >= 70) return { emoji: '🎉', texto: 'Muito Bom!', cor: '#27ae60' };
-    if (porcentagem >= 50) return { emoji: '👍', texto: 'Bom trabalho!', cor: '#3498db' };
-    return { emoji: '💪', texto: 'Continue tentando!', cor: '#e74c3c' };
-  };
+  // Controle de salvamento (evita duplicação)
+  const jaSalvoRef = useRef(false);
 
-  const mensagem = getMensagem();
+    useEffect(() => {
+    let isMounted = true;
 
-  useEffect(() => {
+    const salvarHistorico = async () => {
+      try {
+        const historicoJSON = await AsyncStorage.getItem('@historico_resultados');
+        const historicoAtual = historicoJSON ? JSON.parse(historicoJSON) : [];
+
+        const novoRegistro = {
+          nomeUsuario: nome,
+          pontuacao,
+          totalPerguntas,
+          porcentagem,
+          data: new Date().toISOString(),
+          respostasUsuario,
+        };
+
+        // Verifica se o último registro já é idêntico ao novo
+        const ultimoRegistro = historicoAtual[0];
+        const ehDuplicado =
+          ultimoRegistro &&
+          ultimoRegistro.nomeUsuario === novoRegistro.nomeUsuario &&
+          ultimoRegistro.pontuacao === novoRegistro.pontuacao &&
+          ultimoRegistro.totalPerguntas === novoRegistro.totalPerguntas &&
+          JSON.stringify(ultimoRegistro.respostasUsuario) === JSON.stringify(novoRegistro.respostasUsuario);
+
+        if (!ehDuplicado && isMounted) {
+          const novoHistorico = [novoRegistro, ...historicoAtual];
+          await AsyncStorage.setItem('@historico_resultados', JSON.stringify(novoHistorico));
+          console.log('Histórico salvo.');
+        } else {
+          console.log('Histórico ignorado (duplicado).');
+        }
+      } catch (error) {
+        console.error('Erro ao salvar histórico:', error);
+      }
+    };
+
+    salvarHistorico();
+
     if (somAtivado) {
       setTimeout(() => {
         if (porcentagem >= 70) {
@@ -75,31 +109,41 @@ export default function Resultado() {
         }),
       ]),
     ]).start();
-  }, [porcentagem, somAtivado, scaleAnim, fadeAnim, slideAnim]);
+
+    return () => {
+      isMounted = false; // evita salvar após desmontar
+    };
+  }, []);
+
 
   const voltarHome = () => router.push('/');
   const irParaHistorico = () => router.push('/historico');
 
   const styles = createStyles(theme);
 
+  const getMensagem = () => {
+    if (porcentagem >= 90) return { emoji: '🏆', texto: 'Excelente!', cor: '#f39c12' };
+    if (porcentagem >= 70) return { emoji: '🎉', texto: 'Muito Bom!', cor: '#27ae60' };
+    if (porcentagem >= 50) return { emoji: '👍', texto: 'Bom trabalho!', cor: '#3498db' };
+    return { emoji: '💪', texto: 'Continue tentando!', cor: '#e74c3c' };
+  };
+
+  const mensagem = getMensagem();
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Cabeçalho com pontuação e emoji */}
+        {/* Cabeçalho */}
         <Animated.View style={[styles.headerContainer, { transform: [{ scale: scaleAnim }] }]}>
           <Text style={styles.emoji}>{mensagem.emoji}</Text>
-          <Text style={[styles.mensagem, { color: mensagem.cor }]}>
-            {mensagem.texto}
-          </Text>
+          <Text style={[styles.mensagem, { color: mensagem.cor }]}>{mensagem.texto}</Text>
           <View style={styles.pontuacaoContainer}>
             <Text style={styles.pontuacaoNumero}>
               {pontuacao}/{totalPerguntas}
             </Text>
             <Text style={styles.pontuacaoTexto}>acertos</Text>
           </View>
-          <Text style={[styles.porcentagem, { color: mensagem.cor }]}>
-            {porcentagem}%
-          </Text>
+          <Text style={[styles.porcentagem, { color: mensagem.cor }]}>{porcentagem}%</Text>
         </Animated.View>
 
         {/* Resumo das perguntas */}
@@ -168,7 +212,6 @@ export default function Resultado() {
     </SafeAreaView>
   );
 }
-
 
 const createStyles = (theme) =>
   StyleSheet.create({

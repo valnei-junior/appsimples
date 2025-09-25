@@ -111,7 +111,7 @@ export default function Quiz() {
   });
 
   const fetchGif = async (type) => {
-    const apiKey = 'KZ6zQ1fvRWajOxuXnvce3uPFWYdgOUph';
+    const apiKey = 'KZ6zQ1fvRWajOxuXnvce3uPFWYdgOUp';
       const successWords = [
     'success', 'yay', 'congratulations', 'winner', 'awesome', 'celebration', 'party', 'applause', 'happy', 'victory'
   ];
@@ -174,11 +174,11 @@ export default function Quiz() {
     if (perguntaAtual < perguntas.length - 1) {
       setTimeout(() => {
         proximaPergunta();
-      }, 3000);
+      }, 3);
     } else {
       setTimeout(() => {
         irParaResultado();
-      }, 3000);
+      }, 3);
     }
   }, 300);
 };
@@ -268,7 +268,7 @@ export default function Quiz() {
   router.push({
   pathname: '/resultado',
   params: {
-    nomeUsuario: resultadoFinal.nome,
+    nomeUsuario: nome,
     pontuacao: resultadoFinal.pontuacao,
     totalPerguntas: resultadoFinal.totalPerguntas,
     respostasString: JSON.stringify(resultadoFinal.respostasUsuario),
