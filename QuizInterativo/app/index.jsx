@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useConfig } from '../contexts/ConfigContext';
+import { AccessibilityContext } from '../utils/AccessibilityContext';
 
 const { width } = Dimensions.get('window');
 
