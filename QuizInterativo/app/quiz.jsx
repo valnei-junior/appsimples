@@ -137,56 +137,51 @@ export default function Quiz() {
   };
 
   const selecionarOpcao = (indice) => {
-    if (mostrarResultado) return;
-    setOpcaoSelecionada(indice);
+  if (mostrarResultado) return;
+  setOpcaoSelecionada(indice);
 
-    setTimeout(() => {
-      setMostrarResultado(true);
+  setTimeout(() => {
+    setMostrarResultado(true);
 
-      const pergunta = perguntas[perguntaAtual];
-      const acertou = indice === pergunta.respostaCorreta;
+    const pergunta = perguntas[perguntaAtual];
+    const acertou = indice === pergunta.respostaCorreta;
 
-      
-      // Fetch GIF
-      fetchGif(acertou ? 'success' : 'fail');
+    // Fetch GIF
+    fetchGif(acertou ? 'success' : 'fail');
 
-      // 🔊 TOCAR SOM baseado na resposta (apenas se som estiver ativado)
-      if (somAtivado) {
-        if (acertou) {
-          setPontuacao(pontuacao + 1);
-          soundService.playCorrect();
-        } else {
-          soundService.playWrong();
-        }
-      } else if (acertou) {
+    // 🔊 TOCAR SOM baseado na resposta (apenas se som estiver ativado)
+    if (somAtivado) {
+      if (acertou) {
         setPontuacao(pontuacao + 1);
-      }
-
-      const novaResposta = {
-        pergunta: pergunta.pergunta,
-        opcaoSelecionada: indice,
-        respostaCorreta: pergunta.respostaCorreta,
-        acertou,
-      };
-
-      setRespostasUsuario([...respostasUsuario, novaResposta]);
-
-      if (perguntaAtual < perguntas.length - 1) {
-      
-      // Auto-avança após 2 segundos se não for a última pergunta
-      if (perguntaAtual < perguntasData.length - 1) {
-        setTimeout(() => {
-          proximaPergunta();
-        }, 3000);
+        soundService.playCorrect();
       } else {
-        // Se for a última pergunta, vai para resultado após 2 segundos
-        setTimeout(() => {
-          irParaResultado();
-        }, 3000);
+        soundService.playWrong();
       }
-      }
-    }, 300);
-  };
+    } else if (acertou) {
+      setPontuacao(pontuacao + 1);
+    }
+
+    const novaResposta = {
+      pergunta: pergunta.pergunta,
+      opcaoSelecionada: indice,
+      respostaCorreta: pergunta.respostaCorreta,
+      acertou,
+    };
+
+    setRespostasUsuario([...respostasUsuario, novaResposta]);
+
+    // Corrigido: usar apenas perguntas.length para checar última pergunta
+    if (perguntaAtual < perguntas.length - 1) {
+      setTimeout(() => {
+        proximaPergunta();
+      }, 3000);
+    } else {
+      setTimeout(() => {
+        irParaResultado();
+      }, 3000);
+    }
+  }, 300);
+};
 
   const proximaPergunta = () => {
     if (perguntaAtual < perguntas.length - 1) {
@@ -442,11 +437,6 @@ export default function Quiz() {
                   </View>
                 </View>
               )}
-              <Text style={styles.proximaInstrucao}>
-                {perguntaAtual < perguntas.length - 1
-                  ? '👉 Deslize para a próxima pergunta'
-                  : '🏁 Finalizando quiz...'}
-              </Text>
             </Animated.View>
           </View>
         )}
