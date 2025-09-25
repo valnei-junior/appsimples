@@ -2,7 +2,13 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const Opcoes = ({ opcoes, onSelect, opcaoSelecionada, respostaCorreta, mostrarResultado }) => {
-  
+    console.log('Opcoes component props:', { 
+    opcoes: opcoes?.length, 
+    onSelect: typeof onSelect, 
+    opcaoSelecionada, 
+    respostaCorreta, 
+    mostrarResultado 
+  });
   const getOpcaoStyle = (index) => {
     if (!mostrarResultado) {
       return opcaoSelecionada === index ? styles.opcaoSelecionada : styles.opcao;
@@ -38,13 +44,18 @@ const Opcoes = ({ opcoes, onSelect, opcaoSelecionada, respostaCorreta, mostrarRe
   return (
     <View style={styles.container}>
       {opcoes.map((opcao, index) => (
-        <TouchableOpacity
-          key={index}
-          style={getOpcaoStyle(index)}
-          onPress={() => !mostrarResultado && onSelect(index)}
-          disabled={mostrarResultado}
-          activeOpacity={0.7}
-        >
+       <TouchableOpacity
+  key={index}
+  style={getOpcaoStyle(index)}
+  onPress={() => {
+    alert('Button pressed! onSelect exists: ' + (typeof onSelect === 'function'));
+    if (!mostrarResultado && typeof onSelect === 'function') {
+      onSelect(index);
+    }
+  }}
+  disabled={mostrarResultado}
+  activeOpacity={0.7}
+>
           <View style={styles.opcaoContent}>
             <Text style={styles.letra}>
               {String.fromCharCode(65 + index)}

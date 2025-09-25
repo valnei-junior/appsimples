@@ -75,7 +75,7 @@ export default function Resultado() {
         }),
       ]),
     ]).start();
-  }, [porcentagem, somAtivado]);
+  }, [porcentagem, somAtivado, scaleAnim, fadeAnim, slideAnim]);
 
   const voltarHome = () => router.push('/');
   const irParaHistorico = () => router.push('/historico');
